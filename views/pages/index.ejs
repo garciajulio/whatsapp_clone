@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Whatsapp Clone 🇵🇪</title>
+	<link rel="shortcut icon" href="https://image.flaticon.com/icons/png/512/124/124034.png">
+	<link rel="stylesheet" href="css/whatsapp.css">
+</head>
+<body>
+<div class="main">
+	<div class="aside">
+		<span id="myId"></span>
+		<div class="ListChat" id="listChat"></div>
+	</div>
+
+<div class="frame">
+
+	<div class="welcomeFrame">
+		<img src="img/welcome.jpg" alt=".">
+		<h2>Whatsapp Clone 🇵🇪 by Julio Garcia</h2>
+		<p>Seleciona un usuario del costado para empezar a chatear</p>
+	</div>
+
+	<div class="windowChat">
+		<div class="topHead">
+			<h3>Chateando con <span id="people"></span></h3>
+		</div>
+		<div class="frameChat" id="frameChat"></div>
+		<div class="boxInput">
+			<div class="wrapInput">
+				<input type="text" maxlength="500" autofocus="on" autocomplete="off" id="inputText" placeholder="Escribe un mensaje aquí">
+				<button>➤</button>
+			</div>
+		</div>
+	</div>
+
+</div>	
+</div>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+	
+	/* SE REPITE EL CHAT POR LA SECUENCIA */ 
+
+	const socket = io();
+	var username = prompt("Ingresa tu nombre de usuario");
+	var addressee;
+	var myId;
+	let randomImg = 2;
+	const inputText = document.querySelector('#inputText');
+	const frameChat = document.querySelector('#frameChat');
+	const listChat = document.querySelector('#listChat');
+	const welcomeFrame = document.querySelector('.welcomeFrame');
+	const windowChat = document.querySelector('.windowChat');
+	const people = document.querySelector('#people');
+	const myIdText = document.querySelector('#myId');
+
+	function getHour(){
+
+		let today = new Date();
+		let hours = today.getHours();
+		let minutes = today.getMinutes();
+		let extend = hours >= 12 ? 'p. m.' : 'a. m.';
+ 		hours = hours >= 12 ? (hours-12) : hours;
+
+		return `${hours}:${minutes} ${extend}`;
+	}
+
+
+	socket.on('chat:join', (id) => {
+		myId = id;
+	})
+
+	if(username){
+		socket.emit('chat:join',username);
+	}
+
+	socket.on('chat:privateMessage', ({message,id,from,from_id}) => {
+		
+		let hour = getHour();
+
+		if(people.innerHTML != from){
+			frameChat.innerHTML = "";
+		}
+
+		people.innerHTML = from;
+
+		addressee = from_id;
+		welcomeFrame.style.display = "none";
+		windowChat.style.display = "flex";
+
+		frameChat.innerHTML += `<div class="message message_to"><p>${message}</p><span>${hour}</span></div>`;
+		
+	})
+
+
+
+	function ChatWith(username,id){
+
+		people.innerHTML = username;
+		addressee = id;
+		welcomeFrame.style.display = "none";
+		windowChat.style.display = "flex";
+		frameChat.innerHTML = "";
+	}
+
+	socket.on('chat:listUsers', (usersOnline) =>{
+		
+		listChat.innerHTML = "";
+		
+		usersOnline.map((e)=>{
+
+			if(e.username != username){
+
+				listChat.innerHTML += `<div class="BoxChat" onclick="ChatWith('${e.username}','${e.socket}')"><img src="https://i.pravatar.cc/100?img=${randomImg}" alt="."><h3>${e.username}</h3></div>`;
+
+				randomImg++;
+			}
+			
+		})
+	})
+
+
+	inputText.addEventListener('keydown',(e) => {
+
+		console.log(addressee)
+	  	console.log(myId)
+
+		let message = e.target.value;
+		let hour = getHour();
+
+	  	if(e.keyCode === 13){
+	  		if(message){
+
+	  		frameChat.innerHTML += `<div class="message message_from"><p>${message}</p><span>${hour}</span> </div>`;
+	  		
+	  		const data = {
+	  			from: username,
+	  			from_id: myId,
+	  			id: addressee,
+	  			message: message
+	  		}
+
+	  		socket.emit('chat:privateMessage',data)
+
+	  		inputText.value = "";
+
+	  		//frameChat.scrollTo(0, frameChat.heigth);
+	  		
+	  		}
+	  	}
+	});
+
+</script>
+</body>
+</html>
