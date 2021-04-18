@@ -29,7 +29,7 @@
 		<div class="boxInput">
 			<div class="wrapInput">
 				<input type="text" maxlength="500" autofocus="on" autocomplete="off" id="inputText" placeholder="Escribe un mensaje aquí">
-				<button>➤</button>
+				<button id="btnSend">➤</button>
 			</div>
 		</div>
 	</div>
@@ -61,6 +61,7 @@ if(!window.location.hash){
 	var addressee;
 	var myId;
 	let randomImg = 2;
+	const buttonSend = document.querySelector('#btnSend');
 	const inputText = document.querySelector('#inputText');
 	const frameChat = document.querySelector('#frameChat');
 	const listChat = document.querySelector('#listChat');
@@ -134,6 +135,29 @@ if(!window.location.hash){
 		})
 	})
 
+
+	buttonSend.addEventListener( 'click',() => {
+	  	
+		let message = inputText.value;
+		let hour = getHour();
+
+	  	if(message){
+
+	  		frameChat.innerHTML += `<div class="message message_from"><p>${message}</p><span>${hour}</span> </div>`;
+	  		
+	  		const data = {
+	  			from: username,
+	  			from_id: myId,
+	  			id: addressee,
+	  			message: message
+	  		}
+
+	  		socket.emit('chat:privateMessage',data)
+
+	  		inputText.value = "";
+	  	}
+
+	});
 
 	inputText.addEventListener('keydown',(e) => {
 
