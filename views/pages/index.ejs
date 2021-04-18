@@ -2,10 +2,9 @@
 <html lang="es">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Whatsapp Clone 🇵🇪</title>
 	<link rel="shortcut icon" href="https://image.flaticon.com/icons/png/512/124/124034.png">
-	<link rel="stylesheet" href="css/whatsapp.css">
+	<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="main">
@@ -41,9 +40,22 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-	
-	/* SE REPITE EL CHAT POR LA SECUENCIA */ 
 
+	/*
+		- Funcion para identicar el nombre repetido
+		- Funcion para detectar el desconectado
+	*/
+
+
+if(!window.location.hash){
+  if(document.height < window.outerHeight + 10){
+  document.body.style.height = (window.outerHeight + 50) + 'px';
+  }
+     setTimeout(function(){
+      		window.scrollTo(0, 1);
+      }, 50);
+}
+    
 	const socket = io();
 	var username = prompt("Ingresa tu nombre de usuario");
 	var addressee;
@@ -125,9 +137,6 @@
 
 	inputText.addEventListener('keydown',(e) => {
 
-		console.log(addressee)
-	  	console.log(myId)
-
 		let message = e.target.value;
 		let hour = getHour();
 
@@ -146,8 +155,6 @@
 	  		socket.emit('chat:privateMessage',data)
 
 	  		inputText.value = "";
-
-	  		//frameChat.scrollTo(0, frameChat.heigth);
 	  		
 	  		}
 	  	}

@@ -20,63 +20,38 @@ const socketIO = io(server);
 let usersOnline = [];
 
 
-function isRepeat(usersOnline,username,id){
+
+
+
+/*function isRepeat(usersOnline,user,id){
 	
-	if(usersOnline.length >= 1){
-		usersOnline.map((e)=>{
-			if(!e.username.includes(username)){
-			
-			return {username: username, socket: id};
-			
-			}else{
-				
-				console.log("Se repite")
-				
-				// falta corregir - entra acá pero no usa el return;
-				
-				return "Hola";
-			}
-		})
-	
-	}else{
-		
+	let isRepeat = usersOnline.filter(function(e){ 
+		return e.username === user;
+	});
+
+	if(isRepeat.length >= 1){
+		return {username: `Usuario ${user}`, socket: id}
 	}
 
-	return {username: username, socket: id};
-}
+	return {username: user, socket: id}
+}*/
 
 
 socketIO.on('connection',(socket)=>{
 
 	console.log("New connection active with id "+socket.id)
 
+	socketIO.to(socket.id).emit('chat:join',socket.id)
+
 	socket.on('disconnect', () => {
-
-	/*if(usersOnline.length > 1){
-
-		console.log("Se desconectó un usuario");
-
-		usersOnline.map((e) =>{
-			
-		let s = e.socket.indexOf(socket.id); 
-		console.log(s)
-
-		usersOnline = [];
-	
-		})
-	}*/
-
-   		console.log("User desconnected")
-
+   		console.log("User desconnected with id "+socket.id)
   	});
 
-  	socketIO.to(socket.id).emit('chat:join',socket.id)
+  
 
 	socket.on('chat:join', (username) =>{
 
-		let data = isRepeat(usersOnline,username,socket.id)
-
-		usersOnline.push(data)
+		usersOnline.push({username: username, socket: socket.id})
 
 		socketIO.emit('chat:listUsers',usersOnline)
 	})
